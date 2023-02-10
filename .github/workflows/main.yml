@@ -1,3 +1,5 @@
+# This workflow is to test and make reports for Newman execution on GitHub
+
 name: Automated API tests using Newman CLI
 on: workflow_dispatch
 
@@ -5,27 +7,28 @@ jobs:
   test-api:
     runs-on: ubuntu-latest
     steps:
+    # Check-out repo under $GIBHUB_WORKSPACE, so the job can access it
       - uses: actions/checkout@v3
       - name: Create dir
-        run: |
+        run: 
           mkdir TestArtifact
           
-      # Install Node on Runner
+    # Install Node on Runner
       - name: Install Node
         uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           
-      # Install newman globally
+    # Install newman globally
       - name: Install newman
         run: |
           npm install -g newman
           npm install -g newman-reporter-slackreporter
           npm install -g newman-reporter-htmlextra
           
-      # Run the POSTMAN collection
+    # Run the POSTMAN collection
       - name: Run Tests
-        run: newman run "datumchallenge.postman_collection.json" -e "datumchallenge.postman_globals" -r cli,htmlextra --reporter-htmlextra-exporttestArtifacts/htmlreport.html
+        run: newman run "datumchallenge.postman_collection.json" -e "datumchallenge.postman_globals" -r cli,htmlextra --reporter-htmlextra-export testArtifacts/htmlreport.html
         
         # Upload the reports to TestArtifact directory
       - name: Output the results
