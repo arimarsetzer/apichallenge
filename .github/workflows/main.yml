@@ -1,19 +1,34 @@
-name: Newman Run
-
-on:
-  pull_request:
-    branches:
-    - main
+name: Automated API tests using Newman CLI
+on: workflow_dispatch
 
 jobs:
-  newman:
+  test-api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: matt-ball/newman-action@master
-        with:
-          collection: datumchallenge.postman_collection.json
-          environment: datumchallenge.postman_globals
+      - uses: actions/checkout@v3
+      - name: Create dir
+        run: |
+          mkdir TestArtifact
           
-      - name: Run Collection
-        run:  newman run datumchallenge.postman_collection.json -e datumchallenge.postman_globals
+      # Install Node on Runner
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          
+      # Install newman globally
+      - name: Install newman
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+          
+      # Run the POSTMAN collection
+      - name: Run Tests
+        run: newman run "datumchallenge.postman_collection.json" -e "datumchallenge.postman_globals" -r cli,htmlextra --reporter-htmlextra-exporttestArtifacts/htmlreport.html
+        
+        # Upload the reports to TestArtifact directory
+      - name: Output the results
+        uses: actions/upload-artifact@v3
+        with:
+          Name: Report
+          path: testArtifacts
